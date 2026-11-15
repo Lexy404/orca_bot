@@ -1,0 +1,17 @@
+.venv/
+venv/
+__pycache__/
+.DS_Store
+.env
+**/.env
+orca_executor/
+weights/
+data/
+logs/
+*.bak-*
+backtest_results.csv
+performance_history.csv
+CLAUDE.local.md
+.vscode/
+.ipynb_checkpoints/
+launchd/*.plist

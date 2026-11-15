@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.example.orca_pool_snapshots</string>
+
+    <key>WorkingDirectory</key>
+    <string>/ABSOLUTE/PATH/TO/orca_transformer_bot</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/ABSOLUTE/PATH/TO/orca_transformer_bot/.venv/bin/python</string>
+        <string>/ABSOLUTE/PATH/TO/orca_transformer_bot/collect_pool_snapshots.py</string>
+    </array>
+
+    <!-- one snapshot at load, then every hour; the job exits after each run (no KeepAlive on purpose) -->
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StartInterval</key>
+    <integer>3600</integer>
+
+    <key>StandardOutPath</key>
+    <string>/ABSOLUTE/PATH/TO/orca_transformer_bot/logs/pool_snapshots.log</string>
+    <key>StandardErrorPath</key>
+    <string>/ABSOLUTE/PATH/TO/orca_transformer_bot/logs/pool_snapshots.err.log</string>
+</dict>
+</plist>

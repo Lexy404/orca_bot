@@ -1,0 +1,13 @@
+# Core ML & Numerical Computing
+torch>=2.0.0
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Market Data & Networking
+requests>=2.31.0
+pyzmq>=25.1.0
+
+# Analytics & Plotly Visualizations
+plotly>=5.18.0
+ipykernel>=6.29.0
+nbformat>=4.2.0
