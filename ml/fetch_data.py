@@ -6,7 +6,7 @@ model (see readme.md), so training and serving use the same candles and volume u
 Alternative: --source binance (SOLUSDC on Binance, deeper liquidity).
 
 Usage:
-    python fetch_data.py [--source bybit|binance] [--years 2] [--out data/sol_usdc_data.csv]
+    python ml/fetch_data.py [--source bybit|binance] [--years 2] [--out data/sol_usdc_data.csv]
 
 An existing output file is never overwritten silently: it is first moved to <name>.bak-<unixtime>.
 """
@@ -18,7 +18,7 @@ import time
 import pandas as pd
 import requests
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_OUT = os.path.join(BASE_DIR, "data", "sol_usdc_data.csv")
 HOUR_MS = 3_600_000
 TIMEOUT = 20

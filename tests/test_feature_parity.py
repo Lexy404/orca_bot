@@ -1,12 +1,15 @@
 """Read-only integrity checks: feature parity, splits, quantile ordering, live handler, loss and CLMM math.
-Run: python test_feature_parity.py
+Run from the project root: python tests/test_feature_parity.py
 """
 import json
 import os
+import sys
 
 import numpy as np
 import pandas as pd
 import torch
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "ml"))
 
 from config import NUM_FEATURES, SEQ_LEN, MIN_LIVE_CANDLES, EMBARGO_GAP, split_ranges, validate_bounds, skewed_bounds
 from dataset import CryptoTimeSeriesDataset, build_single_window_features
@@ -15,7 +18,7 @@ from live_predict import handle_request
 from backtest_historical import compute_clm_position, evaluate_clm_hour
 from train import OrcaAsymmetricQuantileLoss
 
-BASE = os.path.dirname(os.path.abspath(__file__))
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CSV = os.path.join(BASE, "data", "sol_usdc_data.csv")
 
 

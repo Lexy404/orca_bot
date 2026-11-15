@@ -15,26 +15,27 @@ The project is under active development. The code is the source of truth: read i
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt   # torch numpy pandas pyzmq requests (+ plotly/ipykernel for the notebook)
 
-python fetch_data.py          # download Bybit SOLUSDC 1h candles (backs up existing CSV)
-python pretrain.py            # self-supervised MAE pre-training
-python train.py               # supervised fine-tuning (with embargo); best checkpoint -> weights/runs/<ts>/
-python train.py --promote     # same, then back up and replace weights/orca_transformer.pth
-python backtest_historical.py [--weights PATH] [--pool-liquidity L] [--volume-multiplier M]  # out-of-sample backtest -> backtest_results.csv
-python live_predict.py        # ZeroMQ inference server
-python dataset.py             # feature / dataset integrity check
-python test_feature_parity.py # feature parity, splits, quantile ordering, live handler errors, CLMM math, loss
+python ml/fetch_data.py          # download Bybit SOLUSDC 1h candles (backs up existing CSV)
+python ml/pretrain.py            # self-supervised MAE pre-training
+python ml/train.py               # supervised fine-tuning (with embargo); best checkpoint -> weights/runs/<ts>/
+python ml/train.py --promote     # same, then back up and replace weights/orca_transformer.pth
+python ml/backtest_historical.py [--weights PATH] [--pool-liquidity L] [--volume-multiplier M]  # out-of-sample backtest -> backtest_results.csv
+python ml/live_predict.py        # ZeroMQ inference server
+python ml/dataset.py             # feature / dataset integrity check
+python tests/test_feature_parity.py # feature parity, splits, quantile ordering, live handler errors, CLMM math, loss
 ```
 
 After changing `model.py` or `dataset.py`, run a forward pass on a random batch and check that output shape is `[batch, 3]` and `pred_high > pred_low` for every row.
 
 ## Files
-- `config.py`: shared constants (`NUM_FEATURES`, `SEQ_LEN`, model output scales, regime thresholds, loss weights, `skewed_bounds`, `validate_bounds`, live limits, `SEED`). Change them only here.
-- `model.py`: `OrcaCryptoTransformer`, `OrcaMaskedAutoencoder`
-- `dataset.py`: feature engineering, sliding-window dataset, `build_single_window_features` (live path)
-- `fetch_data.py`: downloads hourly SOLUSDC candles (default Bybit spot, same market as the live executor; volume in SOL; only closed candles)
-- `pretrain.py`, `train.py`: MAE pre-training, quantile fine-tuning
-- `backtest_historical.py`: CLMM simulator with fees and friction
-- `live_predict.py`: ZeroMQ REP server and regime dispatch
+Layout: `ml/` model, training, backtest and live server code (flat imports inside the folder, run scripts from the project root); `tests/` tests only (`test_feature_parity.py`, manual ZeroMQ client `test_client.py`); the on-chain data tools `collect_pool_snapshots.py` and `analyze_pool_volume.py` stay in the root because the LaunchAgent points at them. Project root = parent of `ml/`; `data/`, `weights/`, `logs/` and outputs live in the root.
+- `ml/config.py`: shared constants (`NUM_FEATURES`, `SEQ_LEN`, model output scales, regime thresholds, loss weights, `skewed_bounds`, `validate_bounds`, live limits, `SEED`). Change them only here.
+- `ml/model.py`: `OrcaCryptoTransformer`, `OrcaMaskedAutoencoder`
+- `ml/dataset.py`: feature engineering, sliding-window dataset, `build_single_window_features` (live path)
+- `ml/fetch_data.py`: downloads hourly SOLUSDC candles (default Bybit spot, same market as the live executor; volume in SOL; only closed candles)
+- `ml/pretrain.py`, `ml/train.py`: MAE pre-training, quantile fine-tuning
+- `ml/backtest_historical.py`: CLMM simulator with fees and friction
+- `ml/live_predict.py`: ZeroMQ REP server and regime dispatch
 - `collect_pool_snapshots.py`: read-only hourly snapshot of the on-chain pool (liquidity profile, fee growth) -> `data/pool_snapshots.csv`; scheduled hourly by a macOS LaunchAgent (template: `launchd/orca_pool_snapshots.plist.example`). Goal: replace the backtest volume multiplier with measured data
 - `analyze_pool_volume.py`: read-only; measured pool volume from `data/pool_snapshots.csv` vs Bybit SOLUSDC (public candles fetched on the fly, `data/sol_usdc_data.csv` untouched); prints per-interval table and the pool/Bybit ratio. Run it at each checkpoint
 - `weights/*.pth`, `weights/runs/`, `data/*.csv`: artifacts, see Safety. `performance_history.csv` (executor output, read by the notebook) and `backtest_results.csv` (backtest output) are git-ignored.

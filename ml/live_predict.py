@@ -123,7 +123,7 @@ def main():
     device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu"))
     print(f"Initializing ZeroMQ Inference Server on device: {device}")
 
-    base_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     weights_path = os.path.join(base_dir, "weights", "orca_transformer.pth")
 
     model = OrcaCryptoTransformer(num_features=NUM_FEATURES).to(device)

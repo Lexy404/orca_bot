@@ -4,13 +4,23 @@ Research code for managing concentrated liquidity on the **Orca Whirlpools SOL/U
 
 > **Status: research project, not a profitable trading system.** The backtest shows that the strategy only pays off when pool volume relative to active liquidity is high enough (see [Findings](#findings)). Nothing here sends on-chain transactions; the repository contains no keys and no executor.
 
+## Project layout
+
+```
+ml/        model, dataset, pre-training, fine-tuning, backtest, ZeroMQ server, data download
+tests/     integrity tests (test_feature_parity.py) and a manual ZeroMQ client (test_client.py)
+collect_pool_snapshots.py, analyze_pool_volume.py   on-chain pool data tools
+launchd/   template for hourly snapshot collection on macOS
+data/, weights/, logs/   generated, git-ignored
+```
+
 ## How it works
 
-1. **Self-supervised pre-training** (`pretrain.py`, `model.py`): a masked autoencoder with contiguous block masking on hourly SOLUSDC features (OHLCV, log return, high-low range, realized volatility, NATR, Chaikin volatility, CLV, plus hour/day embeddings).
-2. **Quantile fine-tuning** (`train.py`): pinball losses for the range bounds, an impermanent-loss downside penalty, a range-width regularizer and an asymmetric trend quantile loss. All weights live in `config.py`.
+1. **Self-supervised pre-training** (`ml/pretrain.py`, `ml/model.py`): a masked autoencoder with contiguous block masking on hourly SOLUSDC features (OHLCV, log return, high-low range, realized volatility, NATR, Chaikin volatility, CLV, plus hour/day embeddings).
+2. **Quantile fine-tuning** (`ml/train.py`): pinball losses for the range bounds, an impermanent-loss downside penalty, a range-width regularizer and an asymmetric trend quantile loss. All weights live in `ml/config.py`.
    - Non-crossing bounds are guaranteed by the parameterization, not by clipping: `p_high = p_low + min_spread + softplus(...)`.
-3. **Regime policy** (`live_predict.py`, thresholds in `config.py`): `NORMAL_LP`, `SKEW_RANGE_DOWN` (moderate predicted drop, range shifted down) or `SKIPPED_CASH` (sharp predicted drop, hold USDC).
-4. **Backtest** (`backtest_historical.py`): CLMM simulator with fees, impermanent loss and friction, run on a held-out test split.
+3. **Regime policy** (`ml/live_predict.py`, thresholds in `ml/config.py`): `NORMAL_LP`, `SKEW_RANGE_DOWN` (moderate predicted drop, range shifted down) or `SKIPPED_CASH` (sharp predicted drop, hold USDC).
+4. **Backtest** (`ml/backtest_historical.py`): CLMM simulator with fees, impermanent loss and friction, run on a held-out test split.
 5. **Pool data collection** (`collect_pool_snapshots.py`, `analyze_pool_volume.py`): hourly read-only snapshots of the on-chain pool (active liquidity, fee growth). Pool volume is derived from the fee-growth delta, so the backtest's volume assumption can be replaced by measured data.
 
 ### Integrity rules the code is built around
@@ -26,12 +36,12 @@ Research code for managing concentrated liquidity on the **Orca Whirlpools SOL/U
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-python fetch_data.py            # ~2 years of hourly SOLUSDC candles (Bybit spot)
-python pretrain.py              # MAE pre-training
-python train.py                 # fine-tuning, checkpoint -> weights/runs/<timestamp>/
-python backtest_historical.py   # out-of-sample backtest -> backtest_results.csv
-python test_feature_parity.py   # integrity tests
-python live_predict.py          # ZeroMQ inference server on tcp://127.0.0.1:5555
+python ml/fetch_data.py            # ~2 years of hourly SOLUSDC candles (Bybit spot)
+python ml/pretrain.py              # MAE pre-training
+python ml/train.py                 # fine-tuning, checkpoint -> weights/runs/<timestamp>/
+python ml/backtest_historical.py   # out-of-sample backtest -> backtest_results.csv
+python tests/test_feature_parity.py   # integrity tests
+python ml/live_predict.py          # ZeroMQ inference server on tcp://127.0.0.1:5555
 ```
 
 `data/`, `weights/` and `logs/` are git-ignored; generate them with the commands above. `backtest_analytics.ipynb` visualizes the backtest output.

@@ -209,7 +209,7 @@ class CryptoTimeSeriesDataset(Dataset):
 
 
 if __name__ == "__main__":
-    base_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     csv_path = os.path.join(base_dir, "data", "sol_usdc_data.csv")
     dataset = CryptoTimeSeriesDataset(csv_path)
     print(f"Successfully constructed {len(dataset)} sliding windows for training.")

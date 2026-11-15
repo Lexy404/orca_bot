@@ -1,12 +1,15 @@
 import json
 import os
+import sys
 
 import pandas as pd
 import zmq
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "ml"))
+
 from config import MIN_LIVE_CANDLES, ZMQ_PORT_DEFAULT
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def ping_ai():

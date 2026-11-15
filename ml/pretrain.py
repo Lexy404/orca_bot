@@ -37,7 +37,7 @@ def main():
     device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu"))
     print(f"Initializing self-supervised pre-training on device: {device}")
 
-    base_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     csv_path = os.path.join(base_dir, "data", "sol_usdc_data.csv")
 
     weights_dir = os.path.join(base_dir, "weights")
